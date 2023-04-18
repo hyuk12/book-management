@@ -1,11 +1,12 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, {useState} from 'react';
 import LoginInput from "../../components/UI/Login/LoginInput/LoginInput";
 import {FiUser} from "@react-icons/all-files/fi/FiUser";
 import {FiLock} from "@react-icons/all-files/fi/FiLock";
 import {css} from "@emotion/react";
 import {Link} from "react-router-dom";
 import {BiRename} from "@react-icons/all-files/bi/BiRename";
+import axios from "axios";
 
 const container = css `
     display: flex;
@@ -41,19 +42,6 @@ const inputLabel = css `
 
 `;
 
-const forgotPassword = css `
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  
-    margin-bottom: 45px;
-    width: 100%;
-  
-    font-size: 12px;
-    font-weight: 600;
-  
-`;
-
 const registerButton = css `
     margin: 10px 0;
     border: 1px solid #dbdbdb;
@@ -80,23 +68,45 @@ const loginMessage = css`
     color: #777;
 `;
 
-const oauth2Container = css `
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px;
-    width: 100%;
-    
-`;
-
-
-
 const register = css`
     margin-top: 10px;
     font-weight: 600;
 `;
 
 const Register = () => {
+
+    const [registerUser, setRegisterUser] = useState({email: '', password: '', name: ''});
+
+    const onChangeHandle = (e) => {
+        const {name, value} = e.target;
+        setRegisterUser({
+            ...registerUser,
+            [name]: value
+        });
+    }
+
+    const registerSubmit = () => {
+        const data = {
+            ...registerUser
+        }
+
+        const option = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+
+        axios.post('http://localhost:8080/auth/signup', JSON.stringify(data), option)
+            .then(response => {
+                console.log("성공");
+                console.log(response);
+            }).catch(error => {
+                console.log("실패");
+                console.log(error.response.data.errorData);
+        });
+        console.log('비동기 테스트');
+    }
+
     return (
         <div css={container}>
           <header>
@@ -106,19 +116,21 @@ const Register = () => {
           <main css={mainContainer}>
             <div css={authForm}>
                 <label css={inputLabel}>Email</label>
-                <LoginInput type={"email"} placeholder={"Type your Email"}>
+                <LoginInput type={"email"} placeholder={"Type your Email"} onChange={onChangeHandle} name={"email"}>
                     <FiUser />
                 </LoginInput>
+
                 <label css={inputLabel}>Password</label>
-                <LoginInput type={"password"} placeholder={"Type your password"}>
+                <LoginInput type={"password"} placeholder={"Type your password"} onChange={onChangeHandle} name={"password"}>
                     <FiLock />
                 </LoginInput>
+
                 <label css={inputLabel}>Name</label>
-                <LoginInput type={"text"} placeholder={"Type your name"}>
+                <LoginInput type={"text"} placeholder={"Type your name"} onChange={onChangeHandle} name={"name"}>
                     <BiRename/>
                 </LoginInput>
 
-                <button css={registerButton}>REGISTER</button>
+                <button css={registerButton} onClick={registerSubmit}>REGISTER</button>
             </div>
           </main>
 
