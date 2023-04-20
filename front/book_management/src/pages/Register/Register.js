@@ -4,7 +4,7 @@ import LoginInput from "../../components/UI/Login/LoginInput/LoginInput";
 import {FiUser} from "@react-icons/all-files/fi/FiUser";
 import {FiLock} from "@react-icons/all-files/fi/FiLock";
 import {css} from "@emotion/react";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {BiRename} from "@react-icons/all-files/bi/BiRename";
 import axios from "axios";
 
@@ -73,9 +73,19 @@ const register = css`
     font-weight: 600;
 `;
 
+const errorMsg = css`
+  margin-left: 5px;
+  margin-bottom: 20px;
+  color: #ff0000;
+  font-size: 12px;
+  font-weight: 600;
+`;
+
 const Register = () => {
+    const navigate = useNavigate();
 
     const [registerUser, setRegisterUser] = useState({email: '', password: '', name: ''});
+    const [errorMessages, setErrorMessages] = useState({email: '', password: '', name: ''});
 
     const onChangeHandle = (e) => {
         const {name, value} = e.target;
@@ -85,7 +95,8 @@ const Register = () => {
         });
     }
 
-    const registerSubmit = () => {
+    // promise 에만 await 을 붙일 수 있다.
+    const registerSubmit = async () => {
         const data = {
             ...registerUser
         }
@@ -95,16 +106,23 @@ const Register = () => {
                 'Content-Type': 'application/json'
             }
         }
+        try {
+            await axios.post('http://localhost:8080/auth/signup', JSON.stringify(data), option);
+            setErrorMessages({email: '', password: '', name: ''});
+            alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
+            navigate('/login');
+        }catch (e) {
+            setErrorMessages({email: '', password: '', name: '', ...e.response.data.errorData});
+        }
 
-        axios.post('http://localhost:8080/auth/signup', JSON.stringify(data), option)
-            .then(response => {
-                console.log("성공");
-                console.log(response);
-            }).catch(error => {
-                console.log("실패");
-                console.log(error.response.data.errorData);
-        });
-        console.log('비동기 테스트');
+        //     .then(response => {
+        //         setErrorMessages({email: '', password: '', name: ''});
+        //         console.log(response);
+        //
+        //     })
+        //     .catch(error => {
+        //         setErrorMessages({email: '', password: '', name: '', ...error.response.data.errorData});
+        // });
     }
 
     return (
@@ -119,17 +137,25 @@ const Register = () => {
                 <LoginInput type={"email"} placeholder={"Type your Email"} onChange={onChangeHandle} name={"email"}>
                     <FiUser />
                 </LoginInput>
+                <div css={errorMsg}>
+                    {errorMessages.email}
+                </div>
 
                 <label css={inputLabel}>Password</label>
                 <LoginInput type={"password"} placeholder={"Type your password"} onChange={onChangeHandle} name={"password"}>
                     <FiLock />
                 </LoginInput>
+                <div css={errorMsg}>
+                    {errorMessages.password}
+                </div>
 
                 <label css={inputLabel}>Name</label>
                 <LoginInput type={"text"} placeholder={"Type your name"} onChange={onChangeHandle} name={"name"}>
                     <BiRename/>
                 </LoginInput>
-
+                <div css={errorMsg}>
+                    {errorMessages.name}
+                </div>
                 <button css={registerButton} onClick={registerSubmit}>REGISTER</button>
             </div>
           </main>

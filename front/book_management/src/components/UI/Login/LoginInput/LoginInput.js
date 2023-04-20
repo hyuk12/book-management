@@ -6,7 +6,7 @@ import {css} from "@emotion/react";
 
 const loginInput = css `
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     border-bottom: 1px solid #dbdbdb;
     padding: 0 5px 0 40px;
     width: 100%;

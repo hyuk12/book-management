@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, {useState} from 'react';
 import LoginInput from "../../components/UI/Login/LoginInput/LoginInput";
 import {FiUser} from "@react-icons/all-files/fi/FiUser";
 import {FiLock} from "@react-icons/all-files/fi/FiLock";
@@ -7,6 +7,7 @@ import {css} from "@emotion/react";
 import {Link} from "react-router-dom";
 import {GrGoogle} from "@react-icons/all-files/gr/GrGoogle";
 import {SiKakao, SiNaver} from "react-icons/si";
+import axios from "axios";
 
 const container = css `
     display: flex;
@@ -112,7 +113,57 @@ const register = css`
     font-weight: 600;
 `;
 
+const errorMsg = css`
+  margin-left: 5px;
+  margin-bottom: 20px;
+  color: #ff0000;
+  font-size: 12px;
+  font-weight: 600;
+`;
+
+
 const Login = () => {
+
+
+    const [loginUser, setLoginUser] = useState({
+        email: '',
+        password: ''
+    });
+
+    const [errorMessages, setErrorMessages] = useState({email: '', password: ''});
+
+    const onChangeHandler = (e) => {
+        const { name, value } = e.target;
+        setLoginUser (
+            {
+                ...loginUser,
+                [name]: value
+            }
+        )
+    }
+
+    const loginHandler = async () => {
+        const data = { ...loginUser}
+        const option = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+        try {
+            const response = await axios.post('http://localhost:8080/auth/login', JSON.stringify(data), option);
+            const accessToken = response.data.grantType + " " + response.data.accessToken;
+
+            localStorage.setItem('accessToken', accessToken);
+            setErrorMessages({email: '', password: ''});
+        }catch (error) {
+            setErrorMessages({email: '', password: '', ...error.response.data.errorData});
+        }
+
+
+    }
+
+
+
     return (
         <div css={container}>
           <header>
@@ -122,17 +173,23 @@ const Login = () => {
           <main css={mainContainer}>
             <div css={authForm}>
                 <label css={inputLabel}>Email</label>
-                <LoginInput type={"email"} placeholder={"Email is required"}>
+                <LoginInput type={"email"} placeholder={"Email is required"} onChange={onChangeHandler} name={"email"}>
                     <FiUser />
                 </LoginInput>
+                <div css={errorMsg}>
+                    {errorMessages.email}
+                </div>
                 <label css={inputLabel}>password</label>
-                <LoginInput type={"password"} placeholder={"password is required"}>
+                <LoginInput type={"password"} placeholder={"password is required"} onChange={onChangeHandler} name={"password"}>
                     <FiLock />
                 </LoginInput>
+                <div css={errorMsg}>
+                    {errorMessages.password}
+                </div>
                 <div css={forgotPassword}>
                     <Link to={"/forgot/password"}>Forgot Password?</Link>
                 </div>
-                <button css={loginButton}>LOGIN</button>
+                <button css={loginButton} onClick={loginHandler}>LOGIN</button>
             </div>
           </main>
 
