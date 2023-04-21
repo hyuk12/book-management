@@ -4,11 +4,13 @@ import com.toyproject.bookmanagement.api.dto.request.auth.JwtTokenRespDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Date;
@@ -53,28 +55,37 @@ public class JwtTokenProvider {
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
+
             return true;
+
         } catch (MalformedJwtException e) {
-            log.error("잘못된 JWT 서명입니다.");
-            return false;
+            log.error("잘못된 JWT 서명입니다.", e);
 
         } catch (ExpiredJwtException e) {
-            log.error("만료된 JWT 토큰입니다.");
-            return false;
+            log.error("만료된 JWT 토큰입니다.", e);
 
         } catch (UnsupportedJwtException e) {
-            log.error("지원되지 않는 JWT 토큰입니다.");
-            return false;
+            log.error("지원되지 않는 JWT 토큰입니다.", e);
 
         } catch (IllegalArgumentException e) {
-            log.error("JWT 토큰이 잘못되었습니다.");
-            return false;
+            log.error("JWT 토큰이 잘못되었습니다.", e);
 
         } catch (SignatureException e) {
             log.error("validateToken error", e);
-            return false;
+
+        } catch (Exception e) {
+            log.error("validateToken error", e);
 
         }
+        return false;
+    }
+
+    public String getToken(String token) {
+        String type = "Bearer";
+        if (StringUtils.hasText(token) && token.startsWith(type)){
+            return token.substring(type.length() + 1);
+        }
+        return null;
     }
 
     public String getMemberId(String token) {

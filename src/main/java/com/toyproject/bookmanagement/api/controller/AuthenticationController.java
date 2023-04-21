@@ -32,4 +32,9 @@ public class AuthenticationController {
         authenticationService.save(signupReqDto);
         return ResponseEntity.ok(true);
     }
+
+    @GetMapping("/authenticated")
+    public ResponseEntity<?> authenticated(String accessToken) {
+        return ResponseEntity.ok(authenticationService.authenticated(accessToken));
+    }
 }

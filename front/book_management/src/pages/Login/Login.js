@@ -4,10 +4,12 @@ import LoginInput from "../../components/UI/Login/LoginInput/LoginInput";
 import {FiUser} from "@react-icons/all-files/fi/FiUser";
 import {FiLock} from "@react-icons/all-files/fi/FiLock";
 import {css} from "@emotion/react";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {GrGoogle} from "@react-icons/all-files/gr/GrGoogle";
 import {SiKakao, SiNaver} from "react-icons/si";
 import axios from "axios";
+import {useRecoilState} from "recoil";
+import {refreshState} from "../../atoms/Auth/AuthAtom";
 
 const container = css `
     display: flex;
@@ -124,13 +126,10 @@ const errorMsg = css`
 
 const Login = () => {
 
-
-    const [loginUser, setLoginUser] = useState({
-        email: '',
-        password: ''
-    });
-
+    const [loginUser, setLoginUser] = useState({email: '', password: ''});
     const [errorMessages, setErrorMessages] = useState({email: '', password: ''});
+    const [refresh, setRefresh] = useRecoilState(refreshState);
+    const navigate = useNavigate();
 
     const onChangeHandler = (e) => {
         const { name, value } = e.target;
@@ -151,10 +150,12 @@ const Login = () => {
         }
         try {
             const response = await axios.post('http://localhost:8080/auth/login', JSON.stringify(data), option);
-            const accessToken = response.data.grantType + " " + response.data.accessToken;
-
-            localStorage.setItem('accessToken', accessToken);
             setErrorMessages({email: '', password: ''});
+
+            const accessToken = response.data.grantType + " " + response.data.accessToken;
+            localStorage.setItem('accessToken', accessToken);
+            setRefresh(false);
+            navigate('/');
         }catch (error) {
             setErrorMessages({email: '', password: '', ...error.response.data.errorData});
         }
