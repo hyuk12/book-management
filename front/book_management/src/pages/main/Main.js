@@ -1,11 +1,12 @@
 import React from 'react';
+import Sidebar from "../../components/Sidebar/Sidebar";
 
 
 const Main = () => {
 
     return (
         <div>
-            <h1>Main Page</h1>
+           <Sidebar/>
         </div>
     );
 };

@@ -1,10 +1,9 @@
 package com.toyproject.bookmanagement.security.jwt;
 
-import com.toyproject.bookmanagement.api.dto.request.auth.JwtTokenRespDto;
+import com.toyproject.bookmanagement.api.dto.response.auth.JwtTokenRespDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,13 +87,12 @@ public class JwtTokenProvider {
         return null;
     }
 
-    public String getMemberId(String token) {
+    public Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .get("userId", String.class);
+                .getBody();
     }
 
 

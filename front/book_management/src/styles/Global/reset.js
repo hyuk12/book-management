@@ -41,16 +41,22 @@ export const Reset =  css`
   }
 
   body {
+    line-height: 1;
+  }
+
+  #root {
+    position: relative;
     margin: 10px auto;
     border: 2px solid #dbdbdb;
     border-radius: 10px;
-    width: 768px;
-    height: 1000px;
-    line-height: 1;
-    
-    box-shadow: 1px 1px 5px #dbdbdb;
-  }
+    padding: 10px;
+    width: 750px;
+    height: 900px;
+    overflow: hidden;
 
+    box-shadow: 1px 1px 7px #dbdbdb;
+  }
+  
   ol, ul {
     list-style: none;
   }

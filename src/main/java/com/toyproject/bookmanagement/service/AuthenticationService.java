@@ -2,13 +2,15 @@ package com.toyproject.bookmanagement.service;
 
 import com.toyproject.bookmanagement.api.dto.request.auth.LoginReqDto;
 import com.toyproject.bookmanagement.api.dto.request.auth.SignupReqDto;
+import com.toyproject.bookmanagement.api.dto.response.auth.PrincipalRespDto;
 import com.toyproject.bookmanagement.domain.entity.Authority;
 import com.toyproject.bookmanagement.domain.entity.Member;
 import com.toyproject.bookmanagement.exception.CustomException;
 import com.toyproject.bookmanagement.exception.ErrorMap;
 import com.toyproject.bookmanagement.repository.MemberRepository;
 import com.toyproject.bookmanagement.security.jwt.JwtTokenProvider;
-import com.toyproject.bookmanagement.api.dto.request.auth.JwtTokenRespDto;
+import com.toyproject.bookmanagement.api.dto.response.auth.JwtTokenRespDto;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -68,5 +70,17 @@ public class AuthenticationService implements UserDetailsService {
     public boolean authenticated(String accessToken) {
 
         return jwtTokenProvider.validateToken(jwtTokenProvider.getToken(accessToken));
+    }
+
+    public PrincipalRespDto getPrincipal(String accessToken) {
+        Claims claims = jwtTokenProvider.getClaims(jwtTokenProvider.getToken(accessToken));
+        Member memberEntity = memberRepository.findMemberByEmail(claims.getSubject());
+
+        return PrincipalRespDto.builder()
+                .userId(memberEntity.getMemberId())
+                .email(memberEntity.getEmail())
+                .name(memberEntity.getName())
+                .authorities((String) claims.get("auth"))
+                .build();
     }
 }

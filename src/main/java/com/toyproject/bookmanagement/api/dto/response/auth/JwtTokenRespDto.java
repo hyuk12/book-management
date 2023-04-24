@@ -1,4 +1,4 @@
-package com.toyproject.bookmanagement.api.dto.request.auth;
+package com.toyproject.bookmanagement.api.dto.response.auth;
 
 import lombok.Builder;
 import lombok.Getter;
