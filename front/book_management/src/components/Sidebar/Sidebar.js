@@ -18,8 +18,9 @@ const sidebar = (isOpen) => css`
   border: 1px solid #dbdbdb;
   border-radius: 10px;
   width: 250px;
-  box-shadow: -1px 0px 5px #dbdbdb;
+  box-shadow: -1px 0 5px #dbdbdb;
   transition: left 1s ease;
+  background-color: #fff;
 
   ${isOpen? "":
           `cursor: pointer;`
@@ -107,7 +108,7 @@ const footer = css`
 
 const Sidebar = () => {
     const [isOpen, SetIsOpen] = useState(false);
-    const {data, isLoading} = useQuery(["principal"], async ()=>{
+    const { data, isLoading} = useQuery(["principal"], async ()=>{
         const accessToken = localStorage.getItem("accessToken");
         const response = await axios.get("http://localhost:8080/auth/principal",
             {params: {accessToken}},
