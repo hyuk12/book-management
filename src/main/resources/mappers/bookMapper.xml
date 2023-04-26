@@ -11,6 +11,7 @@
         <result property="publisherId" column="publisher_id"/>
         <result property="categoryId" column="category_id"/>
         <result property="coverImgUrl" column="cover_img_url"/>
+        <result property="likeCount" column="like_count" />
         <association property="author" resultMap="authorMap"/>
         <association property="publisher" resultMap="publisherMap"/>
         <association property="category" resultMap="categoryMap"/>
@@ -31,7 +32,7 @@
         <result property="categoryName" column="category_name"/>
     </resultMap>
 
-    <select id="getBookList" parameterType="hashmap" resultMap="bookMap">
+    <select id="getBook" parameterType="Integer" resultMap="bookMap">
         SELECT
             bt.book_id,
             bt.book_name,
@@ -53,9 +54,98 @@
             LEFT OUTER JOIN author_tb at ON(at.author_id = bt.author_id)
             LEFT OUTER JOIN publisher_tb pt ON(pt.publisher_id = bt.publisher_id)
             LEFT OUTER JOIN category_tb ct ON(ct.category_id = bt.category_id)
+        WHERE
+            bt.book_id = #{bookId}
+    </select>
+
+    <select id="getBookList" parameterType="hashmap" resultMap="bookMap">
+        SELECT
+            bt.book_id,
+            bt.book_name,
+            bt.author_id,
+            bt.publisher_id,
+            bt.category_id,
+            bt.cover_img_url,
+
+            lc.like_count,
+
+            at.author_id,
+            at.author_name,
+
+            pt.publisher_id,
+            pt.publisher_name,
+
+            ct.category_id,
+            ct.category_name
+        FROM
+            book_tb bt
+            LEFT OUTER JOIN author_tb at ON(at.author_id = bt.author_id)
+            LEFT OUTER JOIN publisher_tb pt ON(pt.publisher_id = bt.publisher_id)
+            LEFT OUTER JOIN category_tb ct ON(ct.category_id = bt.category_id)
+            LEFT OUTER JOIN (SELECT book_id, count(*) AS like_count FROM book_like_tb GROUP BY book_id) lc ON(lc.book_id = bt.book_id)
+        WHERE
+            1 = 1
+
+            <if test="categoryIds != null">
+                AND bt.category_id IN
+                <foreach collection="categoryIds" item="categoryId" open="(" separator="," close=")">
+                    #{categoryId}
+                </foreach>
+            </if>
+
+
+            AND bt.book_name LIKE CONCAT("%", #{searchValue}, "%")
+
         ORDER BY
             bt.book_id
         LIMIT #{index}, 20;
     </select>
 
+    <select id="getTotalCount" parameterType="hashmap" resultType="Integer">
+        SELECT
+            COUNT(*)
+        FROM
+            book_tb bt
+            LEFT OUTER JOIN author_tb at ON(at.author_id = bt.author_id)
+            LEFT OUTER JOIN publisher_tb pt ON(pt.publisher_id = bt.publisher_id)
+            LEFT OUTER JOIN category_tb ct ON(ct.category_id = bt.category_id)
+        WHERE
+            1 = 1
+            <if test="categoryIds != null">
+                AND bt.category_id IN
+                <foreach collection="categoryIds" item="categoryId" open="(" separator="," close=")">
+                    #{categoryId}
+                </foreach>
+            </if>
+
+            AND bt.book_name LIKE CONCAT("%", #{searchValue}, "%")
+
+    </select>
+
+    <select id="getCategoryList" resultMap="categoryMap">
+        SELECT
+            category_id,
+            category_name
+        FROM
+            category_tb
+    </select>
+
+    <select id="getLikeCount" parameterType="Integer" resultType="Integer">
+        SELECT
+            count(*)
+        FROM
+            book_like_tb
+        WHERE
+            book_id = #{bookId}
+    </select>
+
+    <select id="getLikeStatus" parameterType="hashmap" resultType="Integer">
+        SELECT
+            count(*)
+        FROM
+            book_like_tb
+        WHERE
+            book_id = #{bookId}
+        and member_id = #{memberId}
+    </select>
 </mapper>

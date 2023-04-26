@@ -1,23 +1,16 @@
 package com.toyproject.bookmanagement.api.dto.response.book;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 @Builder
 @Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class SearchBookRespDto {
+public class GetBookRespDto {
     private int bookId;
     private String bookName;
-    private int authorId;
-    private int publisherId;
-    private int categoryId;
-    private String coverImgUrl;
-    private int likeCount;
-
     private String authorName;
     private String publisherName;
     private String categoryName;
-
-
+    private String coverImgUrl;
 }

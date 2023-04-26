@@ -1,5 +1,6 @@
 package com.toyproject.bookmanagement.domain.entity.book;
 
+import com.toyproject.bookmanagement.api.dto.response.book.GetBookRespDto;
 import com.toyproject.bookmanagement.api.dto.response.book.SearchBookRespDto;
 import lombok.*;
 
@@ -14,6 +15,7 @@ public class Book {
     private int publisherId;
     private int categoryId;
     private String coverImgUrl;
+    private int likeCount;
 
     private Author author;
     private Publisher publisher;
@@ -28,6 +30,18 @@ public class Book {
                 .publisherId(publisherId)
                 .publisherName(publisher.getPublisherName())
                 .categoryId(categoryId)
+                .categoryName(category.getCategoryName())
+                .coverImgUrl(coverImgUrl)
+                .likeCount(likeCount)
+                .build();
+    }
+
+    public GetBookRespDto toGetBookDto() {
+        return GetBookRespDto.builder()
+                .bookId(bookId)
+                .bookName(bookName)
+                .authorName(author.getAuthorName())
+                .publisherName(publisher.getPublisherName())
                 .categoryName(category.getCategoryName())
                 .coverImgUrl(coverImgUrl)
                 .build();
