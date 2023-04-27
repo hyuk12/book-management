@@ -167,7 +167,7 @@ const Main = () => {
 
     return (
         <div css={mainContainer}>
-            <Sidebar></Sidebar>
+            <Sidebar />
             <header css={header}>
                 <div css={title}>도서검색</div>
                 <div css={searchItems}>

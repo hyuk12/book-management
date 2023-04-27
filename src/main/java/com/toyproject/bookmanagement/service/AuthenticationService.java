@@ -77,7 +77,7 @@ public class AuthenticationService implements UserDetailsService {
         Member memberEntity = memberRepository.findMemberByEmail(claims.getSubject());
 
         return PrincipalRespDto.builder()
-                .userId(memberEntity.getMemberId())
+                .memberId(memberEntity.getMemberId())
                 .email(memberEntity.getEmail())
                 .name(memberEntity.getName())
                 .authorities((String) claims.get("auth"))

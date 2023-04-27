@@ -3,6 +3,7 @@ package com.toyproject.bookmanagement.service;
 import com.toyproject.bookmanagement.api.dto.request.book.SearchBookReqDto;
 import com.toyproject.bookmanagement.api.dto.response.book.CategoryRespDto;
 import com.toyproject.bookmanagement.api.dto.response.book.GetBookRespDto;
+import com.toyproject.bookmanagement.api.dto.response.book.RentalListRespDto;
 import com.toyproject.bookmanagement.api.dto.response.book.SearchBookRespDto;
 import com.toyproject.bookmanagement.domain.entity.Member;
 import com.toyproject.bookmanagement.repository.BookRepository;
@@ -61,14 +62,41 @@ public class BookService {
         return bookRepository.getLikeCount(bookId);
     }
 
-    public int getLikeStatus(int bookId) {
+    public int getLikeStatus(int bookId, int memberId) {
 
         Map<String, Object> map = new HashMap<>();
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
         map.put("bookId", bookId);
-        Member memberEntity = memberRepository.findMemberByEmail(email);
-        map.put("memberId", memberEntity.getMemberId());
+        map.put("memberId", memberId);
 
         return bookRepository.getLikeStatus(map);
+    }
+
+    public int setLike(int bookId, int memberId) {
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("bookId", bookId);
+        map.put("memberId", memberId);
+
+        return bookRepository.setLike(map);
+    }
+
+    public int disLike(int bookId, int memberId) {
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("bookId", bookId);
+        map.put("memberId", memberId);
+
+        return bookRepository.disLike(map);
+    }
+
+    public List<RentalListRespDto> getRentalListByBookId(int bookId) {
+        List<RentalListRespDto> list = new ArrayList<>();
+
+        bookRepository.getRentalList(bookId).forEach(rental -> {
+            list.add(rental.toDto());
+        });
+
+        return list;
     }
 }

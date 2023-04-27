@@ -3,8 +3,9 @@ import React from 'react';
 import {css} from "@emotion/react";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import {useParams} from "react-router-dom";
-import {useQuery} from "react-query";
+import {useMutation, useQuery, useQueryClient} from "react-query";
 import axios from "axios";
+import RentalList from "../../components/UI/BookDetail/RentalList/RentalList";
 
 const mainContainer = css`
   padding: 10px;
@@ -14,6 +15,9 @@ const mainContainer = css`
 
 const BookDetail = () => {
     const { bookId } = useParams();
+
+    const queryClient = useQueryClient();
+    // console.log(queryClient.getQueryData("principal").data);
 
     const getBook = useQuery(["getBook"], async () => {
         const option = {
@@ -35,6 +39,56 @@ const BookDetail = () => {
         return response
     });
 
+    const getLikeStatus = useQuery(["getLikeStatus"], async () => {
+        const option = {
+            params: {
+                memberId: queryClient.getQueryData("principal").data.memberId
+                // memberId: 1
+            },
+            headers: {
+                Authorization: localStorage.getItem("accessToken")
+            }
+        }
+        console.log(option)
+        const response = axios.get(`http://localhost:8080/book/${bookId}/like/status`, option);
+        return response
+    });
+
+    const setLike = useMutation(async () => {
+        const option = {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: localStorage.getItem("accessToken")
+            }
+        }
+        return await axios.post(`http://localhost:8080/book/${bookId}/like`, JSON.stringify({
+                memberId: queryClient.getQueryData("principal").data.memberId
+            }), option);
+    }, {
+        onSuccess: () => {
+            queryClient.invalidateQueries("getLikeCount");
+            queryClient.invalidateQueries("getLikeStatus");
+        }
+    });
+
+    const disLike = useMutation(async () => {
+        const option = {
+            params: {
+                memberId: queryClient.getQueryData("principal").data.memberId
+                // memberId: 1
+            },
+            headers: {
+                Authorization: localStorage.getItem("accessToken")
+            }
+        }
+        return await axios.delete(`http://localhost:8080/book/${bookId}/like`, option);
+    }, {
+        onSuccess: () => {
+            queryClient.invalidateQueries("getLikeCount");
+            queryClient.invalidateQueries("getLikeStatus");
+        }
+    });
+
     if(getBook.isLoading) {
         return (<div>loading....</div>)
     }
@@ -50,10 +104,12 @@ const BookDetail = () => {
                 <div>
                     <img src={getBook.data.data.coverImgUrl} alt={getBook.data.data.coverImgUrl} />
                     <div>
-                        대여가능 갯수
+                        <RentalList bookId={bookId}/>
                     </div>
                     <div>
-                        <button></button>
+                        {getLikeStatus.isLoading ? "" : getLikeStatus.data.data === 0
+                            ? (<button onClick={() => {setLike.mutate()}}>좋아요</button>)
+                            : (<button onClick={() => {disLike.mutate()}}>좋아요 취소</button>)}
                     </div>
                 </div>
             </main>

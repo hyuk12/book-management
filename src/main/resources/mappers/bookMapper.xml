@@ -148,4 +148,40 @@
             book_id = #{bookId}
         and member_id = #{memberId}
     </select>
+
+    <insert id="setLike" >
+        INSERT INTO book_like_tb
+        VALUES (0, #{bookId}, #{memberId})
+    </insert>
+
+    <delete id="disLike" >
+        DELETE
+        FROM
+            book_like_tb
+        WHERE
+            book_id = #{bookId}
+        and member_id = #{memberId}
+    </delete>
+
+    <select id="getRentalList" parameterType="Integer" resultType="com.toyproject.bookmanagement.domain.entity.book.RentalList">
+        SELECT
+            blt.book_list_id AS bookListId,
+            bt.book_name AS bookName,
+            brt.member_id AS memberId
+
+        FROM
+            book_list_tb blt
+            LEFT OUTER JOIN book_tb bt ON(bt.book_id = blt.book_id)
+            LEFT OUTER JOIN book_rental_tb brt ON(brt.book_list_id = blt.book_list_id)
+        WHERE
+            bt.book_id = #{bookId}
+    </select>
+
+    <insert id="rentalBook">
+
+    </insert>
+
+    <delete id="returnBook">
+    
+    </delete>
 </mapper>
