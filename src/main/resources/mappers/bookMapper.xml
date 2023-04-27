@@ -178,10 +178,16 @@
     </select>
 
     <insert id="rentalBook">
-
+        INSERT INTO book_rental_tb
+        VALUES (0, #{bookListId}, #{memberId})
     </insert>
 
     <delete id="returnBook">
-    
+        DELETE
+        FROM
+            book_rental_tb
+        WHERE
+            book_list_id = #{bookListId}
+        and member_id = #{memberId}
     </delete>
 </mapper>

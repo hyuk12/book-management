@@ -49,7 +49,6 @@ const BookDetail = () => {
                 Authorization: localStorage.getItem("accessToken")
             }
         }
-        console.log(option)
         const response = axios.get(`http://localhost:8080/book/${bookId}/like/status`, option);
         return response
     });
