@@ -21,4 +21,5 @@ public interface BookRepository {
    List<RentalList> getRentalList(int bookId);
    int rentalBook(Map<String, Object> map);
    int returnBook(Map<String, Object> map);
+   int bookListRegister(Map<String, Object> map);
 }

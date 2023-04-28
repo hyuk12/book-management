@@ -7,8 +7,9 @@ import {BiLike} from "@react-icons/all-files/bi/BiLike";
 import {BiHome} from "@react-icons/all-files/bi/BiHome";
 import {BiListUl} from "@react-icons/all-files/bi/BiListUl";
 import {BiLogOut} from "@react-icons/all-files/bi/BiLogOut";
-import {useQuery} from "react-query";
-import axios from "axios";
+import {useQueryClient} from "react-query";
+import {isLoggedOutState} from "../../atoms/Auth/AuthAtom";
+import {useRecoilState} from "recoil";
 
 const sidebar = (isOpen) => css`
   position: absolute;
@@ -108,15 +109,9 @@ const footer = css`
 
 const Sidebar = () => {
     const [isOpen, SetIsOpen] = useState(false);
-    const { data, isLoading} = useQuery(["principal"], async ()=>{
-        const accessToken = localStorage.getItem("accessToken");
-        const response = await axios.get("http://localhost:8080/auth/principal",
-            {params: {accessToken}},
-            {
-                enabled : accessToken
-            });
-        return response;
-    });
+    const [, setIsLoggedOut] = useRecoilState(isLoggedOutState);
+
+    const queryClient = useQueryClient();
 
     const sidebarOpenClickHandle = () =>{
         if(!isOpen){
@@ -128,27 +123,29 @@ const Sidebar = () => {
         SetIsOpen(false);
     };
 
-    if(isLoading){
-        return (<div>Loading...</div>)
-    }
-    // console.log(data.data.name)
-
     const logoutHandler = () => {
         if (window.confirm("로그아웃 하시겠습니까?")) {
             localStorage.removeItem("accessToken");
+            setIsLoggedOut(true);
+            queryClient.invalidateQueries('principal');
         }
     }
 
-    if(!isLoading)
+    if (queryClient.getQueryState('principal').status === 'loading'){
+        return (<div>is Loading...</div>);
+    }
+
+    const roles = queryClient.getQueryData('principal').data.authorities.split(",");
+
         return (
             <div css={sidebar(isOpen)} onClick={sidebarOpenClickHandle}>
                 <header css={header}>
                     <div css={userIcon}>
-                        {data.data.name.substring(0,1)}
+                        {queryClient.getQueryData('principal').data.name.substring(0,1)}
                     </div>
                     <div css={userInfo}>
-                        <h1 css={userName}>{data.data.name}</h1>
-                        <p css={userEmail}>{data.data.email}</p>
+                        <h1 css={userName}>{queryClient.getQueryData('principal').data.name}</h1>
+                        <p css={userEmail}>{queryClient.getQueryData('principal').data.email}</p>
                     </div>
                     <div css={closeButton} onClick={sidebarCloseClickHandle} ><GrFormClose /></div>
                 </header>
@@ -156,6 +153,7 @@ const Sidebar = () => {
                     <ListButton title="Dashboard"><BiHome/></ListButton>
                     <ListButton title="Likes"><BiLike/></ListButton>
                     <ListButton title="Rental"><BiListUl/></ListButton>
+                    {roles.includes("ROLE_ADMIN") ? (<ListButton title="RegisterBookList"><BiListUl /></ListButton>) : ""}
                 </main>
                 <footer css={footer}>
                     <ListButton title="Logout" onClick={logoutHandler}><BiLogOut/></ListButton>
